@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Hello, {{ current_user.username }}!</h1>
+	{% for listing in listings %}
+	<div><p><b>{{ listing.body }}</b><br>{{ listing.author.username }}</p></div>
+	{% endfor %}
+{% endblock %}
