@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, IntegerField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo
 from app.models import User
 
@@ -42,7 +42,11 @@ class EditProfileForm(FlaskForm):
 			if user is not None:
 				raise ValidationError('Please use a different username.')
 
-class ListingForm(FlaskForm):
-	listing = TextAreaField('Say something', validators=[
-		DataRequired(), Length(min=1, max=140)])
+class CreateListingForm(FlaskForm):
+	title = TextAreaField('Title', validators=[
+		DataRequired(), Length(min=1, max=64)])
+	body = TextAreaField('Description', validators=[
+		DataRequired(), Length(min=1, max=1024)])
+	desired_size = IntegerField('Desired group size', validators=[
+		DataRequired()])
 	submit = SubmitField('Submit')

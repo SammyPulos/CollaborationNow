@@ -2,17 +2,6 @@
 
 {% block content %}
 	<h1>Hello, {{ current_user.username }}!</h1>
-	<form action="" method="post">
-		{{form.hidden_tag() }}
-		<p>
-			{{ form.listing.label }}<br>
-			{{ form.listing(cols=32, rows=4) }}<br>
-			{% for error in form.listing.errors %}
-			<span style="color: red;">[{{ error }}]</span>
-			{% endfor %}
-		</p>
-		<p>{{ form.submit() }}</p>
-	</form>
 	{% for listing in listings %}
 		{% include '_listing.html' %}
 	{% endfor %}

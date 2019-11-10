@@ -3,9 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app
 from app.models import User, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm
 from datetime import datetime
-from app.forms import ListingForm
 from app.models import Listing
 
 @app.before_request
@@ -18,20 +17,13 @@ def before_request():
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    form = ListingForm()
-    if form.validate_on_submit():
-        listing = Listing(body=form.listing.data, owner=current_user)
-        db.session.add(listing)
-        db.session.commit()
-        flash('Your listing is now posted!')
-        return redirect(url_for('index'))
     page = request.args.get('page', 1, type=int)
-    listings = Listing.query.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+    listings = Listing.query.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
     next_url = url_for('index', page=listings.next_num) \
         if listings.has_next else None
     prev_url = url_for('index', page=listings.prev_num) \
         if listings.has_prev else None
-    return render_template('index.html', title='Home', form=form, listings=listings.items, next_url=next_url, prev_url=prev_url)
+    return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -95,3 +87,21 @@ def edit_profile():
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+@app.route('/create_listing', methods=['GET', 'POST'])
+@login_required
+def create_listing():
+    form = CreateListingForm()
+    if form.validate_on_submit():
+        listing = Listing(title=form.title.data, body=form.body.data, desired_size=form.desired_size.data, owner=current_user)
+        db.session.add(listing)
+        db.session.commit()
+        flash('Your listing is now posted!')
+        return redirect(url_for('index'))
+    return render_template('create_listing.html', title='Create a Listing', form=form)
+
+@app.route('/view_listing/<listing_id>')
+@login_required
+def view_listing(listing_id):
+    listing = Listing.query.filter_by(id=listing_id).first_or_404()
+    return render_template('view_listing.html', listing=listing)

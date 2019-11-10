@@ -5,7 +5,9 @@
 			<a href="{{ url_for('user', username=listing.owner.username) }}">
 				{{ listing.owner.username }}
 			</a>
-			says:<br>{{ listing.body }}
+			<br>
+			<a href="{{ url_for('view_listing', listing_id=listing.id) }}">
+				{{ listing.title }}
 		</td>
 	</tr>
 </table>

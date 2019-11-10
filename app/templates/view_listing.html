@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<table>
+		<tr valign="top">
+			<td>
+				<h1>Listing: {{ listing.title }}</h1>
+				<p>{{ listing.body }}</p>
+				<p>Desired group size: {{ listing.desired_size}}
+				{% if listing.owner == current_user %}
+				<!--- TODO: give user ability to delete listing --->
+				{% endif %}
+			</td>
+		</tr>
+	</table>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Collaboration Now! - Create a Listing</h1>
+	<form action="" method="post">
+		{{ form.hidden_tag() }}
+		<p>
+			{{ form.title.label }}<br>
+			{{ form.title(cols=64, rows=1) }}<br>
+			{% for error in form.title.errors %}
+			<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}
+		</p>
+		<p>
+			{{ form.body.label }}<br>
+			{{ form.body(cols=64, rows=16) }}<br>
+			{% for error in form.body.errors %}
+			<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}
+		</p>
+		<p>
+			{{ form.desired_size.label }}<br>
+			{{ form.desired_size(cols=2, rows=1) }}<br>
+			{% for error in form.desired_size.errors %}
+			<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}
+		</p>
+		<p>{{ form.submit() }}</p>
+	</form>
+{% endblock %}

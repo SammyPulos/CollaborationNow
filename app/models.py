@@ -29,7 +29,9 @@ class User(UserMixin, db.Model):
 
 class Listing(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
+	title = db.Column(db.String(64))
 	body = db.Column(db.String(1024))
+	desired_size = db.Column(db.Integer, default=2) 
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
