@@ -21,7 +21,7 @@ class RegistrationForm(FlaskForm):
 		user = User.query.filter_by(username=username.data).first()
 		if user is not None:
 			raise ValidationError('Please use a different username')
-			
+
 	def validate_email(self, email):
 		user = User.query.filter_by(email=email.data).first()
 		if user is not None:
@@ -41,3 +41,8 @@ class EditProfileForm(FlaskForm):
 			user = User.query.filter_by(username=self.username.data).first()
 			if user is not None:
 				raise ValidationError('Please use a different username.')
+
+class ListingForm(FlaskForm):
+	listing = TextAreaField('Say something', validators=[
+		DataRequired(), Length(min=1, max=140)])
+	submit = SubmitField('Submit')

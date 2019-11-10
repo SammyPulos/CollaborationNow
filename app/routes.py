@@ -5,6 +5,8 @@ from app import app
 from app.models import User, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from datetime import datetime
+from app.forms import ListingForm
+from app.models import Listing
 
 @app.before_request
 def before_request():
@@ -12,21 +14,24 @@ def before_request():
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    listings = [
-        {
-            'owner': {'username': 'TestUser1'},
-            'body': 'Another project needs your help'
-        },
-        {
-            'owner': {'username': 'TestUser2'},
-            'body': 'pls hlp me'
-        }
-    ]
-    return render_template('index.html', title='Home', listings=listings)
+    form = ListingForm()
+    if form.validate_on_submit():
+        listing = Listing(body=form.listing.data, owner=current_user)
+        db.session.add(listing)
+        db.session.commit()
+        flash('Your listing is now posted!')
+        return redirect(url_for('index'))
+    page = request.args.get('page', 1, type=int)
+    listings = Listing.query.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+    next_url = url_for('index', page=listings.next_num) \
+        if listings.has_next else None
+    prev_url = url_for('index', page=listings.prev_num) \
+        if listings.has_prev else None
+    return render_template('index.html', title='Home', form=form, listings=listings.items, next_url=next_url, prev_url=prev_url)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -68,11 +73,13 @@ def register():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    listings = [
-        {'owner': user, 'body': 'Test listing #1'},
-        {'owner': user, 'body': 'Test listing #2'}
-    ]
-    return render_template('user.html', user=user, listings=listings)
+    page = request.args.get('page', 1, type=int)
+    listings = user.listings.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+    next_url = url_for('user', username=user.username, page=listings.next_num) \
+        if listings.has_next else None
+    prev_url = url_for('user', username=user.username, page=listings.prev_num) \
+        if listings.has_prev else None
+    return render_template('user.html', user=user, listings=listings.items, next_url=next_url, prev_url=prev_url)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
