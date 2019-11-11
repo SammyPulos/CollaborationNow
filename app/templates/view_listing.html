@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<table>
-		<tr valign="top">
-			<td>
-				<h1>Listing: {{ listing.title }}</h1>
-				<p>{{ listing.body }}</p>
-				<p>Desired group size: {{ listing.desired_size}}
-				{% if listing.owner == current_user %}
-				<!--- TODO: give user ability to delete listing --->
-				{% endif %}
-			</td>
-		</tr>
-	</table>
+	<h1>Listing: {{ listing.title }}</h1>
+	<form action="" method="post">
+		{{ form.hidden_tag() }}
+		<p>{{ listing.body }}</p>
+		<p>Desired group size: {{ listing.desired_size}}</p>
+		{% if listing.owner == current_user %}
+			{% if listing.is_complete == False %}
+				<p>{{ form.complete_project() }}</p>
+			{% endif %}
+			<p>{{ form.delete_project() }}</p>
+		{% endif %}
+	</form>
 {% endblock %}

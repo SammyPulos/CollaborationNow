@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, PasswordField, BooleanField, IntegerField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo, NumberRange
 from app.models import User
 
 class LoginForm(FlaskForm):
@@ -48,5 +48,9 @@ class CreateListingForm(FlaskForm):
 	body = TextAreaField('Description', validators=[
 		DataRequired(), Length(min=1, max=1024)])
 	desired_size = IntegerField('Desired group size', validators=[
-		DataRequired()])
+		DataRequired(), NumberRange(min=1, max=32, message='Please enter a number from 1 to 32')])	#TODO: validator message wont show
 	submit = SubmitField('Submit')
+
+class EditListingForm(FlaskForm):
+	complete_project = SubmitField(label='Complete Project')
+	delete_project = SubmitField(label='Delete Project')

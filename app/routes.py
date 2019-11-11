@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app
 from app.models import User, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm, EditListingForm
 from datetime import datetime
 from app.models import Listing
 
@@ -18,7 +18,7 @@ def before_request():
 @login_required
 def index():
     page = request.args.get('page', 1, type=int)
-    listings = Listing.query.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
+    listings = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
     next_url = url_for('index', page=listings.next_num) \
         if listings.has_next else None
     prev_url = url_for('index', page=listings.prev_num) \
@@ -100,8 +100,19 @@ def create_listing():
         return redirect(url_for('index'))
     return render_template('create_listing.html', title='Create a Listing', form=form)
 
-@app.route('/view_listing/<listing_id>')
+@app.route('/view_listing/<listing_id>', methods=['GET', 'POST'])
 @login_required
 def view_listing(listing_id):
+    form = EditListingForm()
     listing = Listing.query.filter_by(id=listing_id).first_or_404()
-    return render_template('view_listing.html', listing=listing)
+    print(listing.is_complete)
+    if form.validate_on_submit():
+        if form.complete_project.data:
+            #Listing.query.filter_by(id=listing_id).first_or_404().update({"is_complete"}: (True))
+            setattr(listing, 'is_complete', True)
+            db.session.commit()
+        if form.delete_project.data:
+            Listing.query.filter_by(id=listing_id).delete()
+            db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('view_listing.html', listing=listing, form=form)
