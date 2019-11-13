@@ -1,13 +1,19 @@
-<table>
-	<tr valign="top">
-		<td><img src="{{ listing.owner.avatar(36) }}"></td>
+<table class="table table-hover">
+	<tr>
+		<td width="70px">
+			<a href="{{ url_for('user', username=listing.owner.username) }}">
+				<img src="{{ listing.owner.avatar(36) }}"></td>
+			</a>
+		</td>
 		<td>
+			<a href="{{ url_for('view_listing', listing_id=listing.id) }}">
+				{{ listing.title }}
+			</a>
+			<br>
+			Submitted by: 
 			<a href="{{ url_for('user', username=listing.owner.username) }}">
 				{{ listing.owner.username }}
 			</a>
-			<br>
-			<a href="{{ url_for('view_listing', listing_id=listing.id) }}">
-				{{ listing.title }}
 		</td>
 	</tr>
 </table>

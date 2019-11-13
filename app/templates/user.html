@@ -15,8 +15,8 @@
 			</td>
 		</tr>
 	</table>
-	<h1>User: {{ user.username }}</h1>
 	<hr>
+	<h4>Listings by {{ user.username }}:</h4>
 	{% for listing in listings %}
 		{% include '_listing.html' %}
 	{% endfor %}
