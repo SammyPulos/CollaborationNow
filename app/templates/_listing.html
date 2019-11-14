@@ -2,11 +2,11 @@
 	<tr>
 		<td width="70px">
 			<a href="{{ url_for('user', username=listing.owner.username) }}">
-				<img src="{{ listing.owner.avatar(36) }}"></td>
+				<img src="{{ listing.owner.avatar(49) }}"></td>
 			</a>
 		</td>
 		<td>
-			<a href="{{ url_for('view_listing', listing_id=listing.id) }}">
+			<a href="{{ url_for('view_listing', listing_id=listing.id) }}" style="font-size: 150%">
 				{{ listing.title }}
 			</a>
 			<br>

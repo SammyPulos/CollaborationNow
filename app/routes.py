@@ -105,8 +105,10 @@ def create_listing():
 def view_listing(listing_id):
     form = EditListingForm()
     listing = Listing.query.filter_by(id=listing_id).first_or_404()
+    if listing.is_complete == True:
+        del form.complete_project
     if form.validate_on_submit():
-        if form.complete_project.data:
+        if not listing.is_complete and form.complete_project.data:
             #Listing.query.filter_by(id=listing_id).first_or_404().update({"is_complete"}: (True))
             setattr(listing, 'is_complete', True)
             db.session.commit()
