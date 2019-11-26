@@ -6,6 +6,11 @@
 	<div>
 		<p class="lead">{{ listing.body }}</p>
 		<h5>Desired group size: {{ listing.desired_size}}</h5>
+		<h5>Tags:
+		{% for tag in listing.tags %}
+			#{{tag.tag}}
+		{% endfor %}
+		</h5>
 	</div>
 	<br>
 	{% if listing.owner == current_user %}

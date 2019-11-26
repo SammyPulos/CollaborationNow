@@ -50,6 +50,8 @@ class CreateListingForm(FlaskForm):
 		DataRequired(), Length(min=1, max=1024)])
 	desired_size = IntegerField('Desired group size', validators=[
 		DataRequired(), NumberRange(min=1, max=32, message='Please enter a number from 1 to 32')])	#TODO: validator message wont show
+	tags = TextAreaField('Tags (optional) Ex: #Programming #Python', validators=[
+		Length(min=0, max=1024)])
 	submit = SubmitField('Submit')
 
 class EditListingForm(FlaskForm):
@@ -59,3 +61,9 @@ class EditListingForm(FlaskForm):
 class MessageForm(FlaskForm):
 	message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=140)])
 	submit = SubmitField('Submit')
+
+class FilterForm(FlaskForm):
+	tags = TextAreaField('Tags Ex: #Programming #Python', validators=[
+		Length(min=0, max=1024)])
+	submit = SubmitField('Filter')
+	clear = SubmitField('Clear')

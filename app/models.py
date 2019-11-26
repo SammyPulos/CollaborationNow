@@ -50,6 +50,11 @@ class User(UserMixin, db.Model):
 	def __repr__(self):
 		return '<User {}>'.format(self.email)
 
+listing_tag_assoc = db.Table('listing_tag_assoc',
+	db.Column('listing_id', db.Integer, db.ForeignKey('listing.id')),
+	db.Column('tag_id', db.Integer, db.ForeignKey('listing_tag.id'))
+)
+
 class Listing(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	title = db.Column(db.String(64))
@@ -58,9 +63,17 @@ class Listing(db.Model):
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	is_complete = db.Column(db.Boolean, default=False)
+	tags = db.relationship("ListingTag", secondary=listing_tag_assoc, backref="tagged_listing")
 
 	def __repr__(self):
 		return '<Listing {}>'.format(self.title)
+
+class ListingTag(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	tag = db.Column(db.String(32), unique=True)
+
+	def __repr__(self):
+		return '<ListingTag {}>'.format(self.tag)
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -2,6 +2,18 @@
 
 {% block app_content %}
 	<h1>Hello, {{ current_user.username }}!</h1>
+	<form action="" method="post">
+		{{ form.hidden_tag() }}
+		<p>
+			{{ form.tags.label }}<br>
+			{{ form.tags(cols=64, rows=1) }}<br>
+			{% for error in form.tags.errors %}
+			<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}
+			{{ form.submit() }}
+			{{ form.clear() }}
+		</p>
+	</form>
 	{% for listing in listings %}
 		{% include '_listing.html' %}
 	{% endfor %}

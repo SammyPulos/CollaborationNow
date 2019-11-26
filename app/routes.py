@@ -3,9 +3,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app
 from app.models import User, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm, EditListingForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm, EditListingForm, FilterForm
 from datetime import datetime
-from app.models import Listing
+from app.models import Listing, ListingTag
 from app.forms import MessageForm
 from app.models import Message
 from app.models import Notification
@@ -21,12 +21,31 @@ def before_request():
 @login_required
 def index():
     page = request.args.get('page', 1, type=int)
-    listings = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
+    results = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc())
+    listings = results.paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
     next_url = url_for('index', page=listings.next_num) \
         if listings.has_next else None
     prev_url = url_for('index', page=listings.prev_num) \
         if listings.has_prev else None
-    return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url)
+    form = FilterForm()
+    if form.validate_on_submit():
+        if form.submit.data:
+            search_tags = form.tags.data
+            search_tags = search_tags.replace(" ","").lower().split('#')
+            search_tags = set(list(filter(None, search_tags)))
+            desired_listings = set()
+            for result in results:
+                found_tags = set()
+                for tag in result.tags:
+                    found_tags.add(tag.tag)
+                if search_tags.issubset(found_tags):
+                    desired_listings.add(result.id)
+            print(desired_listings)
+            listings = Listing.query.filter(Listing.id.in_(desired_listings)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+            next_url = None
+            prev_url = None
+        return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url, form=form)
+    return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url, form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -97,8 +116,18 @@ def create_listing():
     form = CreateListingForm()
     if form.validate_on_submit():
         listing = Listing(title=form.title.data, body=form.body.data, desired_size=form.desired_size.data, owner=current_user)
+        tags = form.tags.data
+        tags = tags.replace(" ","").lower().split('#')
+        tags = set(list(filter(None, tags)))
+        print("before")
+        for _tag in tags:
+            tag = ListingTag.query.filter_by(tag=_tag).first()
+            if tag is None:
+                tag=ListingTag(tag=_tag)
+            listing.tags.append(tag)
         db.session.add(listing)
         db.session.commit()
+        print(listing.tags)
         flash('Your listing is now posted!')
         return redirect(url_for('index'))
     return render_template('create_listing.html', title='Create a Listing', form=form)
@@ -116,6 +145,9 @@ def view_listing(listing_id):
             setattr(listing, 'is_complete', True)
             db.session.commit()
         if form.delete_project.data:
+            listing=Listing.query.filter_by(id=listing_id).first_or_404()
+            listing.tags.clear()
+            print(listing.tags)
             Listing.query.filter_by(id=listing_id).delete()
             db.session.commit()
         return redirect(url_for('index'))
