@@ -3,9 +3,19 @@
 
 {% block app_content %}
 	<h1>{{ listing.title }}</h1>
+	<h5>Created by:
+		<a href="{{ url_for('user', username=listing.owner) }}"> {{ listing.owner.username }} </a>
+	</h5>
+	<hr>
 	<div>
 		<p class="lead">{{ listing.body }}</p>
 		<h5>Desired group size: {{ listing.desired_size}}</h5>
+		<hr>
+		<h5>Members:
+		{% for user in listing.members %}
+			<a href="{{ url_for('user', username=user.username) }}"> {{ user.username }} </a>
+		{% endfor %}
+		</h5>
 		<h5>Tags:
 		{% for tag in listing.tags %}
 			#{{tag.tag}}
@@ -13,12 +23,10 @@
 		</h5>
 	</div>
 	<br>
-	{% if listing.owner == current_user %}
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-md-8">
 				{{ wtf.quick_form(form) }}
 			</div>
 		</div>
-	{% endif %}
 	<br>
 {% endblock %}

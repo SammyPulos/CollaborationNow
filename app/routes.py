@@ -40,7 +40,6 @@ def index():
                     found_tags.add(tag.tag)
                 if search_tags.issubset(found_tags):
                     desired_listings.add(result.id)
-            print(desired_listings)
             listings = Listing.query.filter(Listing.id.in_(desired_listings)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
             next_url = None
             prev_url = None
@@ -119,15 +118,14 @@ def create_listing():
         tags = form.tags.data
         tags = tags.replace(" ","").lower().split('#')
         tags = set(list(filter(None, tags)))
-        print("before")
         for _tag in tags:
             tag = ListingTag.query.filter_by(tag=_tag).first()
             if tag is None:
                 tag=ListingTag(tag=_tag)
             listing.tags.append(tag)
+        listing.members.append(current_user)
         db.session.add(listing)
         db.session.commit()
-        print(listing.tags)
         flash('Your listing is now posted!')
         return redirect(url_for('index'))
     return render_template('create_listing.html', title='Create a Listing', form=form)
@@ -139,17 +137,32 @@ def view_listing(listing_id):
     listing = Listing.query.filter_by(id=listing_id).first_or_404()
     if listing.is_complete == True:
         del form.complete_project
+    if current_user.id is not listing.owner.id:
+        del form.complete_project
+        del form.delete_project
+    else:
+        del form.leave_project
+    if current_user in listing.members:
+        del form.join_project
+    else:
+        del form.leave_project 
     if form.validate_on_submit():
-        if not listing.is_complete and form.complete_project.data:
-            #Listing.query.filter_by(id=listing_id).first_or_404().update({"is_complete"}: (True))
+        if not listing.is_complete and form.complete_project is not None and form.complete_project.data:
             setattr(listing, 'is_complete', True)
             db.session.commit()
-        if form.delete_project.data:
-            listing=Listing.query.filter_by(id=listing_id).first_or_404()
-            listing.tags.clear()
-            print(listing.tags)
-            Listing.query.filter_by(id=listing_id).delete()
+        if form.delete_project is not None and form.delete_project.data:
+            listing.tags.clear()    
+            listing.members.clear()
+            Listing.query.filter_by(id=listing_id).delete() # TODO: can I use listing.delete() instead?
             db.session.commit()
+        if form.join_project is not None and form.join_project.data:
+            if current_user not in listing.members:
+                listing.members.append(current_user)
+                db.session.commit()
+        if form.leave_project is not None and form.leave_project.data:
+            if current_user in listing.members:
+                listing.members.remove(current_user)
+                db.session.commit()
         return redirect(url_for('index'))
     return render_template('view_listing.html', listing=listing, form=form)
 

@@ -57,6 +57,8 @@ class CreateListingForm(FlaskForm):
 class EditListingForm(FlaskForm):
 	complete_project = SubmitField(label='Complete Project')
 	delete_project = SubmitField(label='Delete Project')
+	join_project = SubmitField(label='Join Project')
+	leave_project = SubmitField(label='Leave Project')
 
 class MessageForm(FlaskForm):
 	message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=140)])
