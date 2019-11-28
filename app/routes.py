@@ -21,29 +21,32 @@ def before_request():
 @login_required
 def index():
     page = request.args.get('page', 1, type=int)
-    results = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc())
-    listings = results.paginate(page, app.config['LISTINGS_PER_PAGE'], False) #TODO: need a better query to filter out filled/complete projects and sort by tag
-    next_url = url_for('index', page=listings.next_num) \
-        if listings.has_next else None
-    prev_url = url_for('index', page=listings.prev_num) \
-        if listings.has_prev else None
+    tags = request.args.get('tags')
     form = FilterForm()
     if form.validate_on_submit():
         if form.submit.data:
-            search_tags = form.tags.data
-            search_tags = search_tags.replace(" ","").lower().split('#')
-            search_tags = set(list(filter(None, search_tags)))
-            desired_listings = set()
-            for result in results:
-                found_tags = set()
-                for tag in result.tags:
-                    found_tags.add(tag.tag)
-                if search_tags.issubset(found_tags):
-                    desired_listings.add(result.id)
-            listings = Listing.query.filter(Listing.id.in_(desired_listings)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
-            next_url = None
-            prev_url = None
-        return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url, form=form)
+            tags = form.tags.data.replace(" ","").lower()
+            if tags == "":
+                return redirect(url_for('index'))
+            return redirect(url_for('index', tags=tags))
+        if form.clear.data:
+            return redirect(url_for('index'))
+    results = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc())
+    listings = results.paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+    if tags is not None:
+        search_tags = set(list(filter(None, tags.split('#'))))
+        desired_listings = set()
+        for result in results:
+            found_tags = set()
+            for tag in result.tags:
+                found_tags.add(tag.tag)
+            if search_tags.issubset(found_tags):
+                desired_listings.add(result.id)
+        listings = Listing.query.filter(Listing.id.in_(desired_listings)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) 
+    next_url = url_for('index', page=listings.next_num, tags=tags) \
+        if listings.has_next else None
+    prev_url = url_for('index', page=listings.prev_num, tags=tags) \
+        if listings.has_prev else None
     return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url, form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
