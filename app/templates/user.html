@@ -19,14 +19,32 @@
 		</tr>
 	</table>
 	<hr>
-	<h4>Listings by {{ user.username }}:</h4>
-	{% for listing in listings %}
-		{% include '_listing.html' %}
-	{% endfor %}
-	{% if prev_url %}
-	<a href="{{ prev_url }}">Newer posts</a>
-	{% endif %}
-	{% if next_url %}
-	<a href="{{ next_url }}">Older posts</a>
-	{% endif %}
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6">
+				<h4>Current projects:</h4>
+				{% for listing in curr_listings %}
+					{% include '_listing.html' %}
+				{% endfor %}
+				{% if curr_prev_url %}
+					<a href="{{ curr_prev_url }}">Newer posts</a>
+				{% endif %}
+				{% if curr_next_url %}
+					<a href="{{ curr_next_url }}">Older posts</a>
+				{% endif %}
+			</div>
+			<div class="col-md-6">
+				<h4>Completed projects:</h4>
+				{% for listing in comp_listings %}
+					{% include '_listing.html' %}
+				{% endfor %}
+				{% if comp_prev_url %}
+					<a href="{{ comp_prev_url }}">Newer posts</a>
+				{% endif %}
+				{% if comp_next_url %}
+					<a href="{{ comp_next_url }}">Older posts</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 {% endblock %}

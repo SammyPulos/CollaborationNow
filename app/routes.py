@@ -86,13 +86,23 @@ def register():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    page = request.args.get('page', 1, type=int)
-    listings = user.listings.order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
-    next_url = url_for('user', username=user.username, page=listings.next_num) \
-        if listings.has_next else None
-    prev_url = url_for('user', username=user.username, page=listings.prev_num) \
-        if listings.has_prev else None
-    return render_template('user.html', user=user, listings=listings.items, next_url=next_url, prev_url=prev_url)
+    lpage = request.args.get('lpage', 1, type=int)
+    rpage = request.args.get('rpage', 1, type=int)
+    desired_ids = set()
+    for listing in user.joined_listing:
+        desired_ids.add(listing.id)
+    user_listings = Listing.query.filter(Listing.id.in_(desired_ids))
+    curr_listings = user_listings.filter_by(is_complete=False).order_by(Listing.timestamp.desc()).paginate(lpage, app.config['LISTINGS_PER_PAGE']/2, False)
+    comp_listings = user_listings.filter_by(is_complete=True).order_by(Listing.timestamp.desc()).paginate(rpage, app.config['LISTINGS_PER_PAGE']/2, False)
+    curr_next_url = url_for('user', username=user.username, lpage=curr_listings.next_num, rpage=comp_listings.page) \
+        if curr_listings.has_next else None
+    curr_prev_url = url_for('user', username=user.username, lpage=curr_listings.prev_num, rpage=comp_listings.page) \
+        if curr_listings.has_prev else None
+    comp_next_url = url_for('user', username=user.username, lpage=curr_listings.page, rpage=comp_listings.next_num) \
+        if comp_listings.has_next else None
+    comp_prev_url = url_for('user', username=user.username, lpage=curr_listings.page, rpage=comp_listings.prev_num) \
+        if comp_listings.has_prev else None
+    return render_template('user.html', user=user, curr_listings=curr_listings.items, curr_next_url=curr_next_url, curr_prev_url=curr_prev_url, comp_listings=comp_listings.items, comp_next_url=comp_next_url, comp_prev_url=comp_prev_url)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required

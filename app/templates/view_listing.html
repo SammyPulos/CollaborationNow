@@ -3,13 +3,16 @@
 
 {% block app_content %}
 	<h1>{{ listing.title }}</h1>
-	<h5>Created by:
-		<a href="{{ url_for('user', username=listing.owner.username) }}"> {{ listing.owner.username }} </a>
+	<h5>
+		Created by: <a href="{{ url_for('user', username=listing.owner.username) }}"> {{ listing.owner.username }} </a>
+		{% if current_user in listing.members %}
+			<br>Creator email: {{listing.owner.email}}
+		{% endif %}
 	</h5>
 	<hr>
 	<div>
 		<p class="lead">{{ listing.body }}</p>
-		<h5>Desired group size: {{ listing.desired_size}}</h5>
+		<h5>Desired group size: {{ listing.desired_size }}</h5>
 		<hr>
 		<h5>Members:
 		{% for user in listing.members %}
