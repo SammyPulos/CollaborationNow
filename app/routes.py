@@ -172,10 +172,12 @@ def view_listing(listing_id):
             if current_user not in listing.members:
                 listing.members.append(current_user)
                 db.session.commit()
+                flash('A request to join the project has been sent (actually autojoined).')
         if form.leave_project is not None and form.leave_project.data:
             if current_user in listing.members:
                 listing.members.remove(current_user)
                 db.session.commit()
+                flash('You have been removed from the project.')
         return redirect(url_for('index'))
     return render_template('view_listing.html', listing=listing, form=form)
 
