@@ -9,6 +9,7 @@ from app.models import Listing, ListingTag
 from app.forms import MessageForm
 from app.models import Message
 from app.models import Notification
+from collections import OrderedDict
 
 @app.before_request
 def before_request():
@@ -130,7 +131,7 @@ def create_listing():
         listing = Listing(title=form.title.data, body=form.body.data, desired_size=form.desired_size.data, owner=current_user)
         tags = form.tags.data
         tags = tags.replace(" ","").lower().split('#')
-        tags = set(list(filter(None, tags)))
+        tags = list(OrderedDict.fromkeys(filter(None, tags)))
         for _tag in tags:
             tag = ListingTag.query.filter_by(tag=_tag).first()
             if tag is None:

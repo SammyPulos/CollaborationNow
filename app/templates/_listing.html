@@ -14,6 +14,11 @@
 			<a href="{{ url_for('user', username=listing.owner.username) }}">
 				{{ listing.owner.username }}
 			</a>
+			<span style="float:right;">
+				{% for tag in listing.tags %}
+					<a href="{{ url_for('index', tags=tag.tag) }}"> #{{ tag.tag }} </a>
+				{% endfor %}
+			</span>
 		</td>
 	</tr>
 </table>
