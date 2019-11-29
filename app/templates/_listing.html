@@ -16,7 +16,7 @@
 			</a>
 			<span style="float:right;">
 				{% for tag in listing.tags %}
-					<a href="{{ url_for('index', tags=tag.tag) }}"> #{{ tag.tag }} </a>
+					<a href="{{ url_for('index', tags=tag.tag) }}" class="btn btn-primary btn-sm" role="button"> #{{ tag.tag }} </a>
 				{% endfor %}
 			</span>
 		</td>

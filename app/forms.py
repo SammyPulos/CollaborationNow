@@ -65,7 +65,8 @@ class MessageForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 class FilterForm(FlaskForm):
-	tags = TextAreaField('Tags Ex: #Programming #Python', validators=[
+	user_input = TextAreaField('Tags Ex: #Programming #Python', validators=[
 		Length(min=0, max=1024)])
-	submit = SubmitField('Filter')
+	filter_submit = SubmitField('Filter Tags')
+	title_submit = SubmitField('Listing Name')
 	clear = SubmitField('Clear')

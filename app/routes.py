@@ -23,13 +23,19 @@ def before_request():
 def index():
     page = request.args.get('page', 1, type=int)
     tags = request.args.get('tags')
+    title = request.args.get('title')
     form = FilterForm()
     if form.validate_on_submit():
-        if form.submit.data:
-            tags = form.tags.data.replace(" ","").lower()
+        if form.filter_submit.data:
+            tags = form.user_input.data.replace(" ","").lower()
             if tags == "":
                 return redirect(url_for('index'))
             return redirect(url_for('index', tags=tags))
+        if form.title_submit.data:
+            title = form.user_input.data
+            if title == "":
+                return redirect(url_for('index'))
+            return redirect(url_for('index', title=title))
         if form.clear.data:
             return redirect(url_for('index'))
     results = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc())
@@ -44,9 +50,11 @@ def index():
             if search_tags.issubset(found_tags):
                 desired_listings.add(result.id)
         listings = Listing.query.filter(Listing.id.in_(desired_listings)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False) 
-    next_url = url_for('index', page=listings.next_num, tags=tags) \
+    if title is not None:
+        listings = Listing.query.filter(Listing.title.contains(title)).order_by(Listing.timestamp.desc()).paginate(page, app.config['LISTINGS_PER_PAGE'], False)
+    next_url = url_for('index', page=listings.next_num, tags=tags, title=title) \
         if listings.has_next else None
-    prev_url = url_for('index', page=listings.prev_num, tags=tags) \
+    prev_url = url_for('index', page=listings.prev_num, tags=tags, title=title) \
         if listings.has_prev else None
     return render_template('index.html', title='Home', listings=listings.items, next_url=next_url, prev_url=prev_url, form=form)
 
