@@ -18,7 +18,7 @@
 			</td>
 		</tr>
 	</table>
-	<hr>
+	<hr style="border-color: #000000">
 	<div class="container">
 		<div class="row">
 			<div class="col-md-6">
@@ -26,6 +26,7 @@
 				{% for listing in curr_listings %}
 					{% include '_listing.html' %}
 				{% endfor %}
+				<hr style="border-color: #000000">
 				{% if curr_prev_url %}
 					<a href="{{ curr_prev_url }}" class="btn btn-primary btn-sm" role="button">Newer posts</a>
 				{% endif %}
@@ -38,6 +39,7 @@
 				{% for listing in comp_listings %}
 					{% include '_listing.html' %}
 				{% endfor %}
+				<hr style="border-color: #000000">
 				{% if comp_prev_url %}
 					<a href="{{ comp_prev_url }}" class="btn btn-primary btn-sm" role="button">Newer posts</a>
 				{% endif %}

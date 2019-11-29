@@ -9,11 +9,11 @@
 			<br>Creator email: {{listing.owner.email}}
 		{% endif %}
 	</h5>
-	<hr>
+	<hr style="border-color: #000000">
 	<div>
 		<p class="lead">{{ listing.body }}</p>
 		<h5>Desired group size: {{ listing.desired_size }}</h5>
-		<hr>
+		<hr style="border-color: #000000">
 		<h5>Members:
 		{% for user in listing.members %}
 			<a href="{{ url_for('user', username=user.username) }}"> {{ user.username }} </a>
@@ -21,7 +21,7 @@
 		</h5>
 		<h5>Tags:
 		{% for tag in listing.tags %}
-			<a href="{{ url_for('index', tags=tag.tag) }}" class="btn btn-primary btn-sm" role="button"> #{{ tag.tag }} </a>
+			{% include '_tag.html' %}
 		{% endfor %}
 		</h5>
 	</div>

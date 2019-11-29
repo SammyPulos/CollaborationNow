@@ -29,7 +29,8 @@ class RegistrationForm(FlaskForm):
 			raise ValidationError('There is already an account registered to the provided email.')
 
 class EditProfileForm(FlaskForm):
-	username = StringField('Username', validators=[DataRequired()])
+	username = StringField('Username', validators=[DataRequired(), Length(min=1, max=64)])
+	major = StringField('Major (optional)', validators=[Length(min=0, max=64)])
 	about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
 	submit = SubmitField('Submit')
 
@@ -64,7 +65,7 @@ class MessageForm(FlaskForm):
 	message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=140)])
 	submit = SubmitField('Submit')
 
-class FilterForm(FlaskForm):
+class SearchForm(FlaskForm):
 	user_input = TextAreaField('Search: (Ex when filtering by tags #Programming #Python)', validators=[
 		Length(min=0, max=1024)])
 	filter_submit = SubmitField('Filter Tags')

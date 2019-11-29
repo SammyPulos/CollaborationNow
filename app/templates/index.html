@@ -13,6 +13,7 @@
 	{% for listing in listings %}
 		{% include '_listing.html' %}
 	{% endfor %}
+	<hr style="border-color: #000000">
 	{% if prev_url %}
 	<a href="{{ prev_url }}" class="btn btn-primary btn-sm" role="button">Newer posts</a>
 	{% endif %}

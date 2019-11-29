@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app
 from app.models import User, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm, EditListingForm, FilterForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, CreateListingForm, EditListingForm, SearchForm
 from datetime import datetime
 from app.models import Listing, ListingTag
 from app.forms import MessageForm
@@ -25,7 +25,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     tags = request.args.get('tags')
     title = request.args.get('title')
-    form = FilterForm()
+    form = SearchForm()
     if form.validate_on_submit():
         if form.filter_submit.data:
             tags = form.user_input.data.replace(" ","").lower()
@@ -130,10 +130,11 @@ def edit_profile():
     form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
+        current_user.major = form.major.data
         current_user.about_me = form.about_me.data
         db.session.commit()
         flash('Your changes have been saved.')
-        return redirect(url_for('edit_profile'))
+        return redirect(url_for('user', username=current_user.username))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
