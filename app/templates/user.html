@@ -27,10 +27,10 @@
 					{% include '_listing.html' %}
 				{% endfor %}
 				{% if curr_prev_url %}
-					<a href="{{ curr_prev_url }}">Newer posts</a>
+					<a href="{{ curr_prev_url }}" class="btn btn-primary btn-sm" role="button">Newer posts</a>
 				{% endif %}
 				{% if curr_next_url %}
-					<a href="{{ curr_next_url }}">Older posts</a>
+					<a href="{{ curr_next_url }}" class="btn btn-primary btn-sm" role="button">Older posts</a>
 				{% endif %}
 			</div>
 			<div class="col-md-6">
@@ -39,10 +39,10 @@
 					{% include '_listing.html' %}
 				{% endfor %}
 				{% if comp_prev_url %}
-					<a href="{{ comp_prev_url }}">Newer posts</a>
+					<a href="{{ comp_prev_url }}" class="btn btn-primary btn-sm" role="button">Newer posts</a>
 				{% endif %}
 				{% if comp_next_url %}
-					<a href="{{ comp_next_url }}">Older posts</a>
+					<a href="{{ comp_next_url }}" class="btn btn-primary btn-sm" role="button">Older posts</a>
 				{% endif %}
 			</div>
 		</div>

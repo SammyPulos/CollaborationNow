@@ -10,6 +10,7 @@ from app.forms import MessageForm
 from app.models import Message
 from app.models import Notification
 from collections import OrderedDict
+from sqlalchemy.sql import exists
 
 @app.before_request
 def before_request():
@@ -36,6 +37,13 @@ def index():
             if title == "":
                 return redirect(url_for('index'))
             return redirect(url_for('index', title=title))
+        if form.user_submit.data:
+            target_name = form.user_input.data
+            user_exists = db.session.query(exists().where(User.username == target_name)).scalar()
+            if user_exists:
+                return redirect(url_for('user', username=target_name))
+            else:
+                flash('No user found with the entered username')
         if form.clear.data:
             return redirect(url_for('index'))
     results = Listing.query.filter_by(is_complete=False).order_by(Listing.timestamp.desc())
