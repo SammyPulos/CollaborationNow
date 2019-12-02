@@ -214,6 +214,9 @@ def view_listing(listing_id):
         if form.leave_project is not None and form.leave_project.data:
             if current_user in listing.members:
                 listing.members.remove(current_user)
+                msg = Message(sender=current_user, recipient=listing.owner, body=current_user.username+" has left project: "+listing.title)
+                db.session.add(msg)
+                listing.owner.add_notification('unread_message_count', listing.owner.new_messages())
                 db.session.commit()
                 flash('You have been removed from the project.')
         return redirect(url_for('index'))
