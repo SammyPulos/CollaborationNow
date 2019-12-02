@@ -171,7 +171,8 @@ def view_listing(listing_id):
     if current_user.id is not listing.owner.id:
         del form.kick_submit
         del form.kick_selection
-        del form.interested_submit
+        del form.interested_accept
+        del form.interested_reject
         del form.interested_selection
         del form.complete_project
         del form.delete_project
@@ -189,7 +190,8 @@ def view_listing(listing_id):
             interestedList.append((interested.username, interested.username))
         form.interested_selection.choices=interestedList
         if len(interestedList) == 0:
-            del form.interested_submit
+            del form.interested_accept
+            del form.interested_reject
             del form.interested_selection
         del form.leave_project
     if current_user in listing.members:
@@ -207,7 +209,7 @@ def view_listing(listing_id):
                 db.session.commit()
                 flash(target_user.username + " has been kicked")
             return redirect(url_for('view_listing', listing_id=listing.id))
-        if not listing.is_complete and form.interested_submit is not None and form.interested_submit.data:
+        if not listing.is_complete and form.interested_accept is not None and form.interested_accept.data:
             target_user=User.query.filter_by(username=form.interested_selection.data).first_or_404()
             if target_user in listing.interested_users:
                 listing.interested_users.remove(target_user)
@@ -217,6 +219,16 @@ def view_listing(listing_id):
                 target_user.add_notification('unread_message_count', target_user.new_messages())
                 db.session.commit()
                 flash(target_user.username + " has been accepted as a project member")
+            return redirect(url_for('view_listing', listing_id=listing.id))
+        if not listing.is_complete and form.interested_reject is not None and form.interested_reject.data:
+            target_user=target_user=User.query.filter_by(username=form.interested_selection.data).first_or_404()
+            if target_user in listing.interested_users:
+                listing.interested_users.remove(target_user)
+                msg = Message(sender=current_user, recipient=target_user, body="You have been rejected from project: "+listing.title)
+                db.session.add(msg)
+                target_user.add_notification('unread_message_count', target_user.new_messages())
+                db.session.commit()
+                flash(target_user.username + " has been rejected as a project member")
             return redirect(url_for('view_listing', listing_id=listing.id))
         if not listing.is_complete and form.complete_project is not None and form.complete_project.data:
             setattr(listing, 'is_complete', True)
