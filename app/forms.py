@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, BooleanField, IntegerField, SubmitField
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, IntegerField, SubmitField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo, NumberRange
 from app.models import User
 
@@ -56,6 +56,8 @@ class CreateListingForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 class EditListingForm(FlaskForm):
+	kick_selection = SelectField(label='Kick User', coerce=str)
+	kick_submit = SubmitField(label='Kick')
 	complete_project = SubmitField(label='Complete Project')
 	delete_project = SubmitField(label='Delete Project')
 	join_project = SubmitField(label='Join Project')

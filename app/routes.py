@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app
@@ -169,15 +169,35 @@ def view_listing(listing_id):
     if listing.is_complete == True:
         del form.complete_project
     if current_user.id is not listing.owner.id:
+        del form.kick_submit
+        del form.kick_selection
         del form.complete_project
         del form.delete_project
     else:
+        memberList = []
+        for member in listing.members:
+            if member.id is not listing.owner.id:
+                memberList.append((member.username, member.username))
+        form.kick_selection.choices = memberList
+        if len(memberList) == 0:
+            del form.kick_submit
+            del form.kick_selection
         del form.leave_project
     if current_user in listing.members:
         del form.join_project
     else:
         del form.leave_project 
     if form.validate_on_submit():
+        if not listing.is_complete and form.kick_submit is not None and form.kick_submit.data:
+            target_user=User.query.filter_by(username=form.kick_selection.data).first_or_404()
+            if target_user in listing.members:
+                listing.members.remove(target_user)
+                msg = Message(sender=current_user, recipient=target_user, body="You have been kicked from "+listing.title)
+                db.session.add(msg)
+                target_user.add_notification('unread_message_count', target_user.new_messages())
+                db.session.commit()
+                flash(target_user.username + " has been kicked")
+            return redirect(url_for('view_listing', listing_id=listing.id))
         if not listing.is_complete and form.complete_project is not None and form.complete_project.data:
             setattr(listing, 'is_complete', True)
             db.session.commit()
