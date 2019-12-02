@@ -229,7 +229,7 @@ def view_listing(listing_id):
         if form.join_project is not None and form.join_project.data:
             if current_user not in listing.members:
                 listing.interested_users.append(current_user)
-                msg = Message(sender=current_user, recipient=listing.owner, body=current_user.username+" would like to join: "+listing.title+" please view the lsiting to accept")
+                msg = Message(sender=current_user, recipient=listing.owner, body=current_user.username+" would like to join: "+ listing.title +" please view the listing to accept")
                 db.session.add(msg)
                 listing.owner.add_notification('unread_message_count', listing.owner.new_messages())
                 db.session.commit()
