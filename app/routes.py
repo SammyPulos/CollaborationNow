@@ -171,6 +171,8 @@ def view_listing(listing_id):
     if current_user.id is not listing.owner.id:
         del form.kick_submit
         del form.kick_selection
+        del form.interested_submit
+        del form.interested_selection
         del form.complete_project
         del form.delete_project
     else:
@@ -182,6 +184,13 @@ def view_listing(listing_id):
         if len(memberList) == 0:
             del form.kick_submit
             del form.kick_selection
+        interestedList = []
+        for interested in listing.interested_users:
+            interestedList.append((interested.username, interested.username))
+        form.interested_selection.choices=interestedList
+        if len(interestedList) == 0:
+            del form.interested_submit
+            del form.interested_selection
         del form.leave_project
     if current_user in listing.members:
         del form.join_project
@@ -192,11 +201,22 @@ def view_listing(listing_id):
             target_user=User.query.filter_by(username=form.kick_selection.data).first_or_404()
             if target_user in listing.members:
                 listing.members.remove(target_user)
-                msg = Message(sender=current_user, recipient=target_user, body="You have been kicked from "+listing.title)
+                msg = Message(sender=current_user, recipient=target_user, body="You have been kicked from project: "+listing.title)
                 db.session.add(msg)
                 target_user.add_notification('unread_message_count', target_user.new_messages())
                 db.session.commit()
                 flash(target_user.username + " has been kicked")
+            return redirect(url_for('view_listing', listing_id=listing.id))
+        if not listing.is_complete and form.interested_submit is not None and form.interested_submit.data:
+            target_user=User.query.filter_by(username=form.interested_selection.data).first_or_404()
+            if target_user in listing.interested_users:
+                listing.interested_users.remove(target_user)
+                listing.members.append(target_user)
+                msg = Message(sender=current_user, recipient=target_user, body="You have been accepted into project: "+listing.title)
+                db.session.add(msg)
+                target_user.add_notification('unread_message_count', target_user.new_messages())
+                db.session.commit()
+                flash(target_user.username + " has been accepted as a project member")
             return redirect(url_for('view_listing', listing_id=listing.id))
         if not listing.is_complete and form.complete_project is not None and form.complete_project.data:
             setattr(listing, 'is_complete', True)
@@ -204,13 +224,16 @@ def view_listing(listing_id):
         if form.delete_project is not None and form.delete_project.data:
             listing.tags.clear()    
             listing.members.clear()
-            Listing.query.filter_by(id=listing_id).delete() # TODO: can I use listing.delete() instead?
+            Listing.query.filter_by(id=listing_id).delete()
             db.session.commit()
         if form.join_project is not None and form.join_project.data:
             if current_user not in listing.members:
-                listing.members.append(current_user)
+                listing.interested_users.append(current_user)
+                msg = Message(sender=current_user, recipient=listing.owner, body=current_user.username+" would like to join: "+listing.title+" please view the lsiting to accept")
+                db.session.add(msg)
+                listing.owner.add_notification('unread_message_count', listing.owner.new_messages())
                 db.session.commit()
-                flash('A request to join the project has been sent (actually autojoined).')
+                flash("A request to join " + listing.title + " has been sent.")
         if form.leave_project is not None and form.leave_project.data:
             if current_user in listing.members:
                 listing.members.remove(current_user)

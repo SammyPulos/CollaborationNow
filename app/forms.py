@@ -56,8 +56,10 @@ class CreateListingForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 class EditListingForm(FlaskForm):
+	interested_selection = SelectField(label='Accept User', coerce=str)
 	kick_selection = SelectField(label='Kick User', coerce=str)
-	kick_submit = SubmitField(label='Kick')
+	interested_submit = SubmitField(label='Accept User')
+	kick_submit = SubmitField(label='Kick User')
 	complete_project = SubmitField(label='Complete Project')
 	delete_project = SubmitField(label='Delete Project')
 	join_project = SubmitField(label='Join Project')

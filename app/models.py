@@ -12,6 +12,11 @@ listing_user_assoc = db.Table('listing_user_assoc',
 	db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
 )
 
+listing_interested_user_assoc = db.Table('listing_interested_user_assoc',
+	db.Column('listing_id', db.Integer, db.ForeignKey('listing.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 class User(UserMixin, db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(64), index=True, unique=True)
@@ -70,6 +75,7 @@ class Listing(db.Model):
 	is_complete = db.Column(db.Boolean, default=False)
 	tags = db.relationship("ListingTag", secondary=listing_tag_assoc, backref="tagged_listing")
 	members = db.relationship("User", secondary=listing_user_assoc, backref="joined_listing")
+	interested_users = db.relationship("User", secondary=listing_interested_user_assoc, backref="interesting_listing")
 	def __repr__(self):
 		return '<Listing {}>'.format(self.title)
 
